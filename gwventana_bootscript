@@ -128,17 +128,17 @@ if itest.s "x${dtype}" == "xnand" ; then
   setenv fsload "ubifsload"
 elif itest.s "x${dtype}" == "xmmc" ; then
   echo "Booting from MMC..."
-  setenv root "root=/dev/mmcblk0p1 rootwait"
-  setenv fsload "ext4load $dtype 0:1"
+  setenv root "root=/dev/mmcblk0p1 rootflags=subvol=@ rootwait"
+  setenv fsload "load $dtype 0:1"
   setenv rd_addr # ramdisk not needed for IMX6 MMC
 elif itest.s "x${dtype}" == "xusb" ; then
   echo "Booting from USB Mass Storage..."
-  setenv root "root=/dev/sda1 rootwait"
-  setenv fsload "ext4load $dtype 0:1"
+  setenv root "root=PARTLABEL=usbroot rootflags=subvol=@ rootwait"
+  setenv fsload "load $dtype 0:1"
 elif itest.s "x${dtype}" == "xsata" ; then
   echo "Booting from SATA..."
-  setenv root "root=/dev/sda1 rootwait"
-  setenv fsload "ext4load $dtype 0:1"
+  setenv root "root=PARTLABEL=sataroot rootflags=subvol=@ rootwait"
+  setenv fsload "load $dtype 0:1"
   setenv rd_addr # ramdisk not needed for IMX6 AHCI SATA
 fi
 
@@ -153,14 +153,14 @@ setenv rd_addr
 
 # load fdt/kernel/ramdisk
 echo "Loading FDT..."
-$fsload $fdt_addr boot/$fdt_file ||
-$fsload $fdt_addr boot/$fdt_file1 ||
-$fsload $fdt_addr boot/$fdt_file2
+$fsload $fdt_addr $bootdir/$fdt_file ||
+$fsload $fdt_addr $bootdir/$fdt_file1 ||
+$fsload $fdt_addr $bootdir/$fdt_file2
 echo "Loading Kernel..."
-$fsload $linux_addr boot/uImage
+$fsload $linux_addr $bootdir/uImage
 if itest.s "x${rd_addr}" != "x" ; then
   echo "Loading Ramdisk..."
-  $fsload $rd_addr boot/uramdisk
+  $fsload $rd_addr $bootdir/uramdisk
 fi
 if itest.s "x${dtype}" == "xnand" ; then
   ubifsumount
